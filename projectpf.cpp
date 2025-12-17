@@ -1,35 +1,63 @@
-#include <iostream>
+    #include <iostream>
 #include <fstream>
+#include <cstring>
 using namespace std;
 
-// Global arrays to store data
-int custId[100], packageId[100], bookingId[100], scheduleId[100];
-char custName[100][50], custPhone[100][15], custEmail[100][50];
-char destination[100][50], packageDesc[100][100];
-int duration[100];
-float price[100];
-int bookCustId[100], bookPackId[100], numPersons[100];
-char bookingDate[100][15], travelDate[100][15];
-float totalAmount[100];
+// Structure definitions
+struct Customer {
+    int custId;
+    char custName[50];
+    char custPhone[15];
+    char custEmail[50];
+};
 
-// Schedule arrays
-int schedPackId[100];
-char schedDestination[100][50], departureDate[100][15], returnDate[100][15];
-char departureTime[100][10], guideName[100][50];
-int availableSeats[100];
+struct Package {
+    int packageId;
+    char destination[50];
+    int duration;
+    float price;
+    char packageDesc[100];
+};
 
-int custCount = 0, packageCount = 0, bookingCount = 0, scheduleCount = 0;
+struct Schedule {
+    int scheduleId;
+    int schedPackId;
+    char schedDestination[50];
+    char departureDate[15];
+    char returnDate[15];
+    char departureTime[10];
+    char guideName[50];
+    int availableSeats;
+};
+
+struct Booking {
+    int bookingId;
+    int bookCustId;
+    int bookPackId;
+    char bookingDate[15];
+    char travelDate[15];
+    int numPersons;
+    float totalAmount;
+};
+
+// Global arrays using structures
+Customer customers[100];
+Package packages[100];
+Schedule schedules[100];
+Booking bookings[100];
+
+int custCount = 0, packageCount = 0, scheduleCount = 0, bookingCount = 0;
 
 // Function to load customers from file
 void loadCustomers() {
     ifstream file("customers.txt");
     if (file) {
         custCount = 0;
-        while (file >> custId[custCount]) {
+        while (file >> customers[custCount].custId) {
             file.ignore();
-            file.getline(custName[custCount], 50);
-            file.getline(custPhone[custCount], 15);
-            file.getline(custEmail[custCount], 50);
+            file.getline(customers[custCount].custName, 50);
+            file.getline(customers[custCount].custPhone, 15);
+            file.getline(customers[custCount].custEmail, 50);
             custCount++;
         }
         file.close();
@@ -40,10 +68,10 @@ void loadCustomers() {
 void saveCustomers() {
     ofstream file("customers.txt");
     for (int i = 0; i < custCount; i++) {
-        file << custId[i] << "\n";
-        file << custName[i] << "\n";
-        file << custPhone[i] << "\n";
-        file << custEmail[i] << "\n";
+        file << customers[i].custId << "\n";
+        file << customers[i].custName << "\n";
+        file << customers[i].custPhone << "\n";
+        file << customers[i].custEmail << "\n";
     }
     file.close();
 }
@@ -52,17 +80,17 @@ void saveCustomers() {
 void addCustomer() {
     cout << "\n--- Add New Customer ---\n";
     cout << "Enter Customer ID: ";
-    cin >> custId[custCount];
+    cin >> customers[custCount].custId;
     cin.ignore();
     
     cout << "Enter Name: ";
-    cin.getline(custName[custCount], 50);
+    cin.getline(customers[custCount].custName, 50);
     
     cout << "Enter Phone: ";
-    cin.getline(custPhone[custCount], 15);
+    cin.getline(customers[custCount].custPhone, 15);
     
     cout << "Enter Email: ";
-    cin.getline(custEmail[custCount], 50);
+    cin.getline(customers[custCount].custEmail, 50);
     
     custCount++;
     saveCustomers();
@@ -82,8 +110,8 @@ void viewAllCustomers() {
     cout << "-----------------------------------------------------------\n";
     
     for (int i = 0; i < custCount; i++) {
-        cout << custId[i] << "\t" << custName[i] << "\t\t" 
-             << custPhone[i] << "\t" << custEmail[i] << "\n";
+        cout << customers[i].custId << "\t" << customers[i].custName << "\t\t" 
+             << customers[i].custPhone << "\t" << customers[i].custEmail << "\n";
     }
 }
 
@@ -96,12 +124,12 @@ void searchCustomer() {
     cin >> id;
     
     for (int i = 0; i < custCount; i++) {
-        if (custId[i] == id) {
+        if (customers[i].custId == id) {
             cout << "\n--- Customer Found ---\n";
-            cout << "ID: " << custId[i] << "\n";
-            cout << "Name: " << custName[i] << "\n";
-            cout << "Phone: " << custPhone[i] << "\n";
-            cout << "Email: " << custEmail[i] << "\n";
+            cout << "ID: " << customers[i].custId << "\n";
+            cout << "Name: " << customers[i].custName << "\n";
+            cout << "Phone: " << customers[i].custPhone << "\n";
+            cout << "Email: " << customers[i].custEmail << "\n";
             found = true;
             break;
         }
@@ -117,13 +145,13 @@ void loadPackages() {
     ifstream file("packages.txt");
     if (file) {
         packageCount = 0;
-        while (file >> packageId[packageCount]) {
+        while (file >> packages[packageCount].packageId) {
             file.ignore();
-            file.getline(destination[packageCount], 50);
-            file >> duration[packageCount];
-            file >> price[packageCount];
+            file.getline(packages[packageCount].destination, 50);
+            file >> packages[packageCount].duration;
+            file >> packages[packageCount].price;
             file.ignore();
-            file.getline(packageDesc[packageCount], 100);
+            file.getline(packages[packageCount].packageDesc, 100);
             packageCount++;
         }
         file.close();
@@ -134,11 +162,11 @@ void loadPackages() {
 void savePackages() {
     ofstream file("packages.txt");
     for (int i = 0; i < packageCount; i++) {
-        file << packageId[i] << "\n";
-        file << destination[i] << "\n";
-        file << duration[i] << "\n";
-        file << price[i] << "\n";
-        file << packageDesc[i] << "\n";
+        file << packages[i].packageId << "\n";
+        file << packages[i].destination << "\n";
+        file << packages[i].duration << "\n";
+        file << packages[i].price << "\n";
+        file << packages[i].packageDesc << "\n";
     }
     file.close();
 }
@@ -147,21 +175,21 @@ void savePackages() {
 void addPackage() {
     cout << "\n--- Add New Tour Package ---\n";
     cout << "Enter Package ID: ";
-    cin >> packageId[packageCount];
+    cin >> packages[packageCount].packageId;
     cin.ignore();
     
     cout << "Enter Destination: ";
-    cin.getline(destination[packageCount], 50);
+    cin.getline(packages[packageCount].destination, 50);
     
     cout << "Enter Duration (days): ";
-    cin >> duration[packageCount];
+    cin >> packages[packageCount].duration;
     
     cout << "Enter Price: ";
-    cin >> price[packageCount];
+    cin >> packages[packageCount].price;
     cin.ignore();
     
     cout << "Enter Description: ";
-    cin.getline(packageDesc[packageCount], 100);
+    cin.getline(packages[packageCount].packageDesc, 100);
     
     packageCount++;
     savePackages();
@@ -181,9 +209,9 @@ void viewAllPackages() {
     cout << "-------------------------------------------------------------------\n";
     
     for (int i = 0; i < packageCount; i++) {
-        cout << packageId[i] << "\t" << destination[i] << "\t\t" 
-             << duration[i] << "\t" << price[i] << "\t\t" 
-             << packageDesc[i] << "\n";
+        cout << packages[i].packageId << "\t" << packages[i].destination << "\t\t" 
+             << packages[i].duration << "\t" << packages[i].price << "\t\t" 
+             << packages[i].packageDesc << "\n";
     }
 }
 
@@ -196,13 +224,13 @@ void searchPackage() {
     cin >> id;
     
     for (int i = 0; i < packageCount; i++) {
-        if (packageId[i] == id) {
+        if (packages[i].packageId == id) {
             cout << "\n--- Package Found ---\n";
-            cout << "Package ID: " << packageId[i] << "\n";
-            cout << "Destination: " << destination[i] << "\n";
-            cout << "Duration: " << duration[i] << " days\n";
-            cout << "Price: " << price[i] << "\n";
-            cout << "Description: " << packageDesc[i] << "\n";
+            cout << "Package ID: " << packages[i].packageId << "\n";
+            cout << "Destination: " << packages[i].destination << "\n";
+            cout << "Duration: " << packages[i].duration << " days\n";
+            cout << "Price: " << packages[i].price << "\n";
+            cout << "Description: " << packages[i].packageDesc << "\n";
             found = true;
             break;
         }
@@ -218,15 +246,15 @@ void loadSchedules() {
     ifstream file("schedules.txt");
     if (file) {
         scheduleCount = 0;
-        while (file >> scheduleId[scheduleCount]) {
-            file >> schedPackId[scheduleCount];
+        while (file >> schedules[scheduleCount].scheduleId) {
+            file >> schedules[scheduleCount].schedPackId;
             file.ignore();
-            file.getline(schedDestination[scheduleCount], 50);
-            file.getline(departureDate[scheduleCount], 15);
-            file.getline(returnDate[scheduleCount], 15);
-            file.getline(departureTime[scheduleCount], 10);
-            file.getline(guideName[scheduleCount], 50);
-            file >> availableSeats[scheduleCount];
+            file.getline(schedules[scheduleCount].schedDestination, 50);
+            file.getline(schedules[scheduleCount].departureDate, 15);
+            file.getline(schedules[scheduleCount].returnDate, 15);
+            file.getline(schedules[scheduleCount].departureTime, 10);
+            file.getline(schedules[scheduleCount].guideName, 50);
+            file >> schedules[scheduleCount].availableSeats;
             file.ignore();
             scheduleCount++;
         }
@@ -238,14 +266,14 @@ void loadSchedules() {
 void saveSchedules() {
     ofstream file("schedules.txt");
     for (int i = 0; i < scheduleCount; i++) {
-        file << scheduleId[i] << "\n";
-        file << schedPackId[i] << "\n";
-        file << schedDestination[i] << "\n";
-        file << departureDate[i] << "\n";
-        file << returnDate[i] << "\n";
-        file << departureTime[i] << "\n";
-        file << guideName[i] << "\n";
-        file << availableSeats[i] << "\n";
+        file << schedules[i].scheduleId << "\n";
+        file << schedules[i].schedPackId << "\n";
+        file << schedules[i].schedDestination << "\n";
+        file << schedules[i].departureDate << "\n";
+        file << schedules[i].returnDate << "\n";
+        file << schedules[i].departureTime << "\n";
+        file << schedules[i].guideName << "\n";
+        file << schedules[i].availableSeats << "\n";
     }
     file.close();
 }
@@ -254,29 +282,29 @@ void saveSchedules() {
 void addSchedule() {
     cout << "\n--- Add New Tour Schedule ---\n";
     cout << "Enter Schedule ID: ";
-    cin >> scheduleId[scheduleCount];
+    cin >> schedules[scheduleCount].scheduleId;
     
     cout << "Enter Package ID: ";
-    cin >> schedPackId[scheduleCount];
+    cin >> schedules[scheduleCount].schedPackId;
     cin.ignore();
     
     cout << "Enter Destination: ";
-    cin.getline(schedDestination[scheduleCount], 50);
+    cin.getline(schedules[scheduleCount].schedDestination, 50);
     
     cout << "Enter Departure Date (DD/MM/YYYY): ";
-    cin.getline(departureDate[scheduleCount], 15);
+    cin.getline(schedules[scheduleCount].departureDate, 15);
     
     cout << "Enter Return Date (DD/MM/YYYY): ";
-    cin.getline(returnDate[scheduleCount], 15);
+    cin.getline(schedules[scheduleCount].returnDate, 15);
     
     cout << "Enter Departure Time (HH:MM): ";
-    cin.getline(departureTime[scheduleCount], 10);
+    cin.getline(schedules[scheduleCount].departureTime, 10);
     
     cout << "Enter Guide Name: ";
-    cin.getline(guideName[scheduleCount], 50);
+    cin.getline(schedules[scheduleCount].guideName, 50);
     
     cout << "Enter Available Seats: ";
-    cin >> availableSeats[scheduleCount];
+    cin >> schedules[scheduleCount].availableSeats;
     
     scheduleCount++;
     saveSchedules();
@@ -296,10 +324,10 @@ void viewAllSchedules() {
     cout << "-----------------------------------------------------------------------------------------\n";
     
     for (int i = 0; i < scheduleCount; i++) {
-        cout << scheduleId[i] << "\t" << schedPackId[i] << "\t" 
-             << schedDestination[i] << "\t" << departureDate[i] << "\t" 
-             << returnDate[i] << "\t" << departureTime[i] << "\t" 
-             << guideName[i] << "\t" << availableSeats[i] << "\n";
+        cout << schedules[i].scheduleId << "\t" << schedules[i].schedPackId << "\t" 
+             << schedules[i].schedDestination << "\t" << schedules[i].departureDate << "\t" 
+             << schedules[i].returnDate << "\t" << schedules[i].departureTime << "\t" 
+             << schedules[i].guideName << "\t" << schedules[i].availableSeats << "\n";
     }
 }
 
@@ -312,16 +340,16 @@ void searchSchedule() {
     cin >> id;
     
     for (int i = 0; i < scheduleCount; i++) {
-        if (scheduleId[i] == id) {
+        if (schedules[i].scheduleId == id) {
             cout << "\n--- Schedule Found ---\n";
-            cout << "Schedule ID: " << scheduleId[i] << "\n";
-            cout << "Package ID: " << schedPackId[i] << "\n";
-            cout << "Destination: " << schedDestination[i] << "\n";
-            cout << "Departure Date: " << departureDate[i] << "\n";
-            cout << "Return Date: " << returnDate[i] << "\n";
-            cout << "Departure Time: " << departureTime[i] << "\n";
-            cout << "Guide Name: " << guideName[i] << "\n";
-            cout << "Available Seats: " << availableSeats[i] << "\n";
+            cout << "Schedule ID: " << schedules[i].scheduleId << "\n";
+            cout << "Package ID: " << schedules[i].schedPackId << "\n";
+            cout << "Destination: " << schedules[i].schedDestination << "\n";
+            cout << "Departure Date: " << schedules[i].departureDate << "\n";
+            cout << "Return Date: " << schedules[i].returnDate << "\n";
+            cout << "Departure Time: " << schedules[i].departureTime << "\n";
+            cout << "Guide Name: " << schedules[i].guideName << "\n";
+            cout << "Available Seats: " << schedules[i].availableSeats << "\n";
             found = true;
             break;
         }
@@ -337,14 +365,14 @@ void loadBookings() {
     ifstream file("bookings.txt");
     if (file) {
         bookingCount = 0;
-        while (file >> bookingId[bookingCount]) {
-            file >> bookCustId[bookingCount];
-            file >> bookPackId[bookingCount];
+        while (file >> bookings[bookingCount].bookingId) {
+            file >> bookings[bookingCount].bookCustId;
+            file >> bookings[bookingCount].bookPackId;
             file.ignore();
-            file.getline(bookingDate[bookingCount], 15);
-            file.getline(travelDate[bookingCount], 15);
-            file >> numPersons[bookingCount];
-            file >> totalAmount[bookingCount];
+            file.getline(bookings[bookingCount].bookingDate, 15);
+            file.getline(bookings[bookingCount].travelDate, 15);
+            file >> bookings[bookingCount].numPersons;
+            file >> bookings[bookingCount].totalAmount;
             file.ignore();
             bookingCount++;
         }
@@ -356,13 +384,13 @@ void loadBookings() {
 void saveBookings() {
     ofstream file("bookings.txt");
     for (int i = 0; i < bookingCount; i++) {
-        file << bookingId[i] << "\n";
-        file << bookCustId[i] << "\n";
-        file << bookPackId[i] << "\n";
-        file << bookingDate[i] << "\n";
-        file << travelDate[i] << "\n";
-        file << numPersons[i] << "\n";
-        file << totalAmount[i] << "\n";
+        file << bookings[i].bookingId << "\n";
+        file << bookings[i].bookCustId << "\n";
+        file << bookings[i].bookPackId << "\n";
+        file << bookings[i].bookingDate << "\n";
+        file << bookings[i].travelDate << "\n";
+        file << bookings[i].numPersons << "\n";
+        file << bookings[i].totalAmount << "\n";
     }
     file.close();
 }
@@ -371,26 +399,26 @@ void saveBookings() {
 void addBooking() {
     cout << "\n--- Add New Booking ---\n";
     cout << "Enter Booking ID: ";
-    cin >> bookingId[bookingCount];
+    cin >> bookings[bookingCount].bookingId;
     
     cout << "Enter Customer ID: ";
-    cin >> bookCustId[bookingCount];
+    cin >> bookings[bookingCount].bookCustId;
     
     cout << "Enter Package ID: ";
-    cin >> bookPackId[bookingCount];
+    cin >> bookings[bookingCount].bookPackId;
     cin.ignore();
     
     cout << "Enter Booking Date (DD/MM/YYYY): ";
-    cin.getline(bookingDate[bookingCount], 15);
+    cin.getline(bookings[bookingCount].bookingDate, 15);
     
     cout << "Enter Travel Date (DD/MM/YYYY): ";
-    cin.getline(travelDate[bookingCount], 15);
+    cin.getline(bookings[bookingCount].travelDate, 15);
     
     cout << "Enter Number of Persons: ";
-    cin >> numPersons[bookingCount];
+    cin >> bookings[bookingCount].numPersons;
     
     cout << "Enter Total Amount: ";
-    cin >> totalAmount[bookingCount];
+    cin >> bookings[bookingCount].totalAmount;
     
     bookingCount++;
     saveBookings();
@@ -410,10 +438,10 @@ void viewAllBookings() {
     cout << "------------------------------------------------------------------------\n";
     
     for (int i = 0; i < bookingCount; i++) {
-        cout << bookingId[i] << "\t" << bookCustId[i] << "\t" 
-             << bookPackId[i] << "\t" << bookingDate[i] << "\t" 
-             << travelDate[i] << "\t\t" << numPersons[i] << "\t" 
-             << totalAmount[i] << "\n";
+        cout << bookings[i].bookingId << "\t" << bookings[i].bookCustId << "\t" 
+             << bookings[i].bookPackId << "\t" << bookings[i].bookingDate << "\t" 
+             << bookings[i].travelDate << "\t\t" << bookings[i].numPersons << "\t" 
+             << bookings[i].totalAmount << "\n";
     }
 }
 
@@ -426,15 +454,15 @@ void searchBooking() {
     cin >> id;
     
     for (int i = 0; i < bookingCount; i++) {
-        if (bookingId[i] == id) {
+        if (bookings[i].bookingId == id) {
             cout << "\n--- Booking Found ---\n";
-            cout << "Booking ID: " << bookingId[i] << "\n";
-            cout << "Customer ID: " << bookCustId[i] << "\n";
-            cout << "Package ID: " << bookPackId[i] << "\n";
-            cout << "Booking Date: " << bookingDate[i] << "\n";
-            cout << "Travel Date: " << travelDate[i] << "\n";
-            cout << "Number of Persons: " << numPersons[i] << "\n";
-            cout << "Total Amount: " << totalAmount[i] << "\n";
+            cout << "Booking ID: " << bookings[i].bookingId << "\n";
+            cout << "Customer ID: " << bookings[i].bookCustId << "\n";
+            cout << "Package ID: " << bookings[i].bookPackId << "\n";
+            cout << "Booking Date: " << bookings[i].bookingDate << "\n";
+            cout << "Travel Date: " << bookings[i].travelDate << "\n";
+            cout << "Number of Persons: " << bookings[i].numPersons << "\n";
+            cout << "Total Amount: " << bookings[i].totalAmount << "\n";
             found = true;
             break;
         }
